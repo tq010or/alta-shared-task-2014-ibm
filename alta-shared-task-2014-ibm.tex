@@ -127,6 +127,16 @@ hashtag and user mention
 
 \subsection{Gazetted Features}
 
+GeoNames\footnote{GeoNames site: \url{http://www.geonames.org}} is a geographical database with information about all countries with over eight million place names, such as city names and points of interest (POI).
+
+Some place names in GeoNames are used as well commonly without denoting a location.
+Examples of these terms include person names, natural disasters (e.g. storm), and names that usually do not denote a location (e.g. Friday or Friend).
+We collected stopwords starting with a standard one and we added the 5 thousand most frequent English terms\footnote{http://www.wordfrequency.info}, natural disaster names from Wikipedia and a list of popular person names\footnote{https://online.justice.vic.gov.au/bdm/popular-names}.
+
+After extracting and cleaning the terms from GeoNames, the list has over 9.8 million terms.
+The dictionary has been used to annotate the tweets using ConceptMapper~\cite{tanenblatt2010conceptmapper}.
+The GeoNames annotation has been to indicate to the CRF which tokens might denote a location.
+
 \subsection{Deep Features}
 
 Small data amount
@@ -145,6 +155,32 @@ Semi-supervised learning
 
 
 Experiment number with feature ablations
+
+\section{Discussion}
+\label{sec:discussion}
+%% We could talk about the issues with our approach
+
+Our system incorrectly identified some tokens as locations.
+Most of the false positives were due to CRF mistakes.
+Examples of these mistakes are annotation of tokens like \textit{bushfires}, 
+Probably a larger data set would allow the CRF model to avoid these mistakes.
+On the other hand, many false positives produced by our system look as genuine locations.
+For instance, \textit{bakery} was not annotated in \textit{Chinatown bakery} but is was annotated in \textit{Manchester Wong Wong's bakery} a few tweets below.
+Some locations such as \textit{Kumbarilla State Forest} or \textit{Shire of Carnar} seem to be false positives as well.
+Possibly the noise in the data set is responsible as well for errors produced by our CRF tagger.
+
+Even with our best efforts to remove location names that would not typically denote a location, there are some GeoNames locations in our dictionary that typically do not denote a location, e.g.~\textit{the end of the world}.
+
+Our system missed some Twitter user names or hashtags with location information (e.g. \textit{@FireRescueNSW}, \textit{@abcsouthqld}, \textit{\#NZquake})
+These locations contain an acronym or abbreviation denoting a location as prefix or suffix of a word that was not in our dictionary.
+For some locations, the acronym or abbreviation denoting a location was not in our location dictionary (e.g. \textit{Melb}).
+
+Some location names were not in our GeoName dictionary and were neither identified by the CRF.
+Examples of these location names include \textit{Coal Quay}, \textit{Pretty Bach} or \textit{Massabielle grotto}.
+Some two letter US states acronyms were not recognized by our system, e.g. OR, IR, MT or MT.
+
+In a few cases, our system missed part of the location name when it was a specific location if a location name.
+For instance, \textit{markets} was not annotated in \textit{Kelvin Grove markets} or \textit{grounds} was not annotated in \textit{UTS grounds}.
 
 
 \section{Conclusion and Future Work}
