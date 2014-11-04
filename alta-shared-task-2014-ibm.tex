@@ -15,11 +15,13 @@
 \newcommand{\mybf}[1]{\textbf{#1}}
 \newcommand{\myex}[1]{\textit{#1}}
 \newcommand{\lexpair}[2]{\myex{#1}\xspace\mygl{#2}}
-\newcommand{\classname}[1]{\textsf{#1}\xspace}
+\newcommand{\method}[1]{\textsf{#1}\xspace}
 \newcommand{\x}{\phantom{0}}
 \newcommand{\ngram}{\textit{n}-gram\ }
 \newcommand{\stanford}{\textsc{Stanford}\xspace}
 \newcommand{\washington}{\textsc{Washington}\xspace}
+\newcommand{\msra}{\textsc{msra}\xspace}
+\newcommand{\cmu}{\textsc{cmu}\xspace}
 \newcommand{\alta}{\textsc{ALTA}\xspace}
 \newcommand{\feature}[1]{\texttt{#1}\xspace}
 \newcommand{\myurl}[1]{{\footnotesize\url{#1}}}
@@ -93,36 +95,68 @@ Similarly, Twitter specific entities sometimes are sentence constituents, \eg \m
 However, they may be a topic tag that is non-compliant to the sentence syntactic structure, \eg hashtags in \myex{I like travel to beautiful places, \#travel \#melbourne}.
 For the latter case, syntactic features would be less effective.
 
-To this end, widely-used NER features requires to be re-examined in social media.
+To this end, widely-used NER features require to be re-examined in social media.
 
 \section{Feature Engineering}
 \label{sec:feature}
-% stanford + EMNLP 2011 (Alan) system
-We engineer features on basis of existing successful systems.
-The widely used \stanford and Twitter-specific \washington are chosen for comparison.
-Main features are highlighted in \tabref{tab:fea_comp}.
+
+\subsection{Brief Litearture on NER Feature Enginnering}
+\label{sec:literature}
+We engineer features by reviewing some representative systems.
+The main features of representative systems are summarised in \tabref{tab:fea_comp}.
+
+\stanford NER combined Gibbs sampling and a widely used CRF model \cite{acl05fink}.
+The Gibbs sampling offers non-local constraints to the conventional CRF model that utilises a range of local features.
+The features in the CRF model include word features, POS tag features, character \ngram features, word shape features and the presence of words in a pre-defined window.
+The word and POS tag features also includes the surrounding tokens and tags to capture the local context information.
+
+\newcite{acl11liux} proposed a two-stage CRF-based tagger \msra for Twitter NER.
+First, a \textit{k}-NN classifier pre-categorises words, and then feeds results to a downstream CRF modeller.
+The features they adopted in \textit{k}-NN are two word text windows including the target word (\ie five words in total).
+The gazetted resources (from Wikipedia) are also utilised and shown effective in their experiments.
+As for the features for building the second stage CRF model, they follow \newcite{conll09rati} and made use of words tokens, word types (\eg whether the word is alphanumeric or capitalised?), word morphological features (\eg suffix and prefix of words), previous tagging labels, word context windows, and conjunction features that combine both tags and word context windows.
+%Among various extensions on their experiments, they also found gazetteers are quite helpful on both social media and existing datasets.
+%Clustering lexical variants seems a complex story, it doesn't show clear improvement on social media dataset (as reported), but bears much improvements on the conventional datasets.
+
+Recently, another \washington NER tool was developed by rebuilding a Twitter-specific NLP pipeline (\eg from tokenisation and POS tagging to chunking and NER).
+They adopted rich information generated in the pipeline, such as POS tags, chunking and predicted capitalisation information, as well as Brown clustering of lexical variants and gazetted features from Freebase.
 
 % table 
-\begin{table}[h]
+\begin{table*}[!htp]
 \begin{center}
 \begin{tabular}{lccc}
 \hline 
-Features & \stanford & \washington & \alta \\ 
+Features                                     & \stanford & \msra & \washington \\ 
 \hline
-\feature{BoW} & \cmark & & \\
-\feature{BoW-2} & & & \\
-\feature{POS} & & & \\
-\feature{POS-2} & & & \\
+\feature{Word}                               & \cmark & \cmark & \cmark \\
+\feature{Word Context}                       & \cmark & \cmark & \cmark \\
+\feature{Word Morphology}                    & Character \ngram  & Affix & Brown Cluster \\
+%\feature{Non-local constraints}              & Gibbs sampling & \textit{k}-NN results & labelled-LDA \\
+\feature{POS}                                & \cmark & \xmark & in-domain POS tagger\\
+\feature{Chunking}                           & \xmark & \xmark & in-domain chunker \\
+\feature{Capitalisation}                     & \xmark & \cmark & in-domain capitalisation restoration\\
+\feature{Gazetteers}                         & \xmark & Wikipedia & Freebase \\
 \hline
 \end{tabular}
 \end{center}
-\caption{Referred features in literature}
+\caption{Features comparison of represtative NER Systems}
 \label{tab:fea_comp}
-\end{table}
+\end{table*}
 
-Basic features such as bag-of-words and part-of-speech tags are included.
 
-\subsection{Domain-specific Features}
+\subsection{Proposed Features}
+\label{sec:basic_feature}
+
+Based on the previous representative NER work, we select our features with justifications as follows:
+\begin{itemize}
+    \item \feature{Word}. Lowercased word types are included as a default feature as suggested by existing systems. Previous and next words are also included to capture local context information. Larger context window size is not considered as Twitter data is quite terse and ungrammatical, incorporating long distance context may bring little context information but introduce more noise;
+    \item \feature{POS}. Based on the fact that location named entities are primarily nouns. A reliable POS tagger generates valuable clues for locations. Instead of re-building an NLP pipeline, we adopt an off-the-shelf Twitter POS tagger \cmu that generates coursed-grained POS tags with high accuracy ($\ge$ 90\%) \cite{naacl13owop}. Similar to \feature{Word}, the previous and next \feature{POS} tags are also included.
+    \item \feature{Capitalisation}. Instead of normalising token case in Twitter (\eg \cite{emnlp11ritt}), four types of capitalisation information are retrieved based on the original surface form. Namely, they are all character uppercased (AU), all character lowercased (AL), first character uppercased and the rest are lowercased (UL) and mixed capitalisation (MC). 
+    \item \feature{Domain}. 
+    \item \feature{Gazetteer}. 
+    \item \feature{Deep Learning}.
+\end{itemize}
+
 hashtag and user mention
 
 \subsection{Gazetted Features}
@@ -148,11 +182,6 @@ Semi-supervised learning
 
 \section{Experiments and Discussion}
 \label{sec:experiment}
-
-\subsection{CRF Model}
-\subsection{CRF Model + Deep Features}
-\subsection{CRF Model + Semi-supervised Learning}
-
 
 Experiment number with feature ablations
 
