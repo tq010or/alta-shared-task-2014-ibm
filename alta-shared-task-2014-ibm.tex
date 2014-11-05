@@ -27,7 +27,6 @@
 \newcommand{\cmu}{\textsc{cmu}\xspace}
 \newcommand{\crfsuite}{\textsc{CRF-suite}\xspace}
 \newcommand{\wordvec}{\textsc{Word2Vec}\xspace}
-\newcommand{\alta}{\textsc{ALTA}\xspace}
 \newcommand{\feature}[1]{\texttt{#1}\xspace}
 \newcommand{\myurl}[1]{{\footnotesize\url{#1}}}
 
@@ -45,8 +44,10 @@
 \setlist[itemize]{noitemsep}
 \setlist[enumerate]{noitemsep}
 
-
+%TODO: we need some native speaker to proofread the final draft
 \title{Identifying Twitter Location Mentions}
+
+%TODO: we need to figure out authorship layout
 
 \author{First Author \\
   Affiliation / Address line 1 \\
@@ -84,7 +85,7 @@ Following the literature on NER \cite{wwwc13ling}, we formulate it as a sequenti
 The main contributions of the paper are:
 (1) A sequential labeller for identifying location mentions in social media;
 (2) Feature analysis and comparison in NER between social media and other genres.
-(3) Additional experiments and discussion on extending current sequential labeller.
+(3) Discussion on errors and extensions to current sequential labeller.
 
 \section{Challenges}
 \label{sec:challenge}
@@ -157,11 +158,11 @@ Based on the previous representative NER work, we considered the following featu
 
 \begin{itemize}
     \item \feature{Word}. Lowercased word types are included as a default feature as suggested by existing systems. Previous and next two words are also included to capture local context information. Larger context window size is not considered as Twitter data is fairly terse and ungrammatical \cite{baldwin2013}, so incorporating long distance context may bring little context information but introduce more noise.
-    \item \feature{POS}. Based on the fact that location named entities are primarily nouns. A reliable POS tagger generates valuable clues for locations. Instead of re-building an NLP pipeline, we adopt an off-the-shelf Twitter POS tagger \cmu that generates coursed-grained POS tags with high accuracy ($\ge$ 90\%) \cite{naacl13owop}. Similar to \feature{Word}, the previous and next two \feature{POS} tags are also included. We also consider \feature{POS} bigrams.
-    \item \feature{Capitalisation}. Instead of normalising token case in Twitter (\eg \cite{emnlp11ritt}), four types of capitalisation information are retrieved based on the original surface form. Namely, they are all character uppercased (AU), all character lowercased (AL), first character uppercased and the rest are lowercased (UL) and mixed capitalisation (MC). We also consider \feature{Capitalisation} bigrams.
-    \item \feature{Domain}. Twitter specific entities such as user mentions, hashtags and URLs are considered as normal words. This is because many location mentions are embedded in these entities. For instance, \myex{@Iran}, \myex{\#brisbane} and \myurl{http:www.abc.net.au/melbourne/}. Furthermore, we distinguish whether a word is in a stop word or not. Moreover, some location clues such as \myex{street} are identified as in-domain task-specific features.
-    \item \feature{Gazetteer}. Literature has shown that external gazetted resources are helpful in identifying named entities. Therefore, we incorporate features based on external place names, \eg whether a current word is in a refined list of place names. Details are discussed in \secref{sec:gaze_feature}.
-    \item \feature{Gazetteer Morphology}. As an extension of previous \feature{gazetteer} features, we also observed that gazetted names may form part of a token and this is particularly common for Twitter specific entities, \eg \myex{\#IranEQ} and \myex{@zdnetaustralia}. As a result, we also perform partial matching of string in \secref{sec:mor_feature}. 
+    \item \feature{POS}. Based on the fact that location named entities are primarily nouns. A reliable POS tagger generates valuable clues for locations. Instead of re-building an NLP pipeline, we adopt an off-the-shelf Twitter POS tagger \cmu that generates coursed-grained POS tags with high accuracy ($\ge$ 90\%) \cite{naacl13owop}. Similar to \feature{word}, the previous and next two \feature{POS} tags are also included. We also consider \feature{POS} bigrams.
+    \item \feature{Capitalisation}. Instead of predicting token case in Twitter (\eg \cite{emnlp11ritt}), four types of capitalisation information are retrieved based on the original surface form. Namely, they are all character uppercased (AU), all character lowercased (AL), first character uppercased and the rest are lowercased (UL) and mixed capitalisation (MC). We also consider \feature{capitalisation} bigrams.
+    \item \feature{Domain}. Twitter specific entities such as user mentions, hashtags and URLs are considered as normal words. This is because many location mentions are embedded in these entities. For instance, \myex{@Iran}, \myex{\#brisbane} and \myurl{http:www.abc.net.au/melbourne/}. Furthermore, we distinguish whether a word is in a stop word or not. Moreover, some location clues such as \myex{street} are also categorised as task-specific features in this feature group.
+    \item \feature{Gazetteer}. Literature has shown that external gazetted resources are helpful in identifying named entities. Therefore, we incorporate features based on external place names, \eg whether a current word is in a refined list of locations. Details are in \secref{sec:gaze_feature}.
+    \item \feature{Gazetteer Morphology}. As an extension of previous \feature{gazetteer} features, we also observed that gazetted names may form part of a token and this is particularly common for Twitter specific entities, \eg \myex{\#IranEQ} and \myex{@zdnetaustralia}. As a result, we also perform partial string matching in \secref{sec:mor_feature}. 
 \end{itemize}
 
 \subsection{Gazetteers}
@@ -169,7 +170,8 @@ Based on the previous representative NER work, we considered the following featu
 
 We adopted \geoname as our primary source of gazetted features.
 
-It is a geographical database with information about all countries with over eight million place names, such as city names and points of interest.\footnote{GeoNames site: \myurl{http://www.geonames.org}} 
+%TODO: why filtering generates more entries? before filtering is 8M , after filing is 9.8M? Please double check
+It is a geographical database with information about all countries with over eight million place names, such as city names and points of interest.\footnote{\geoname site: \myurl{http://www.geonames.org}} 
 However, as noted by \newcite{acl11liux}, some place names are also commonly used to denote something other than a location.
 Examples of these terms include people's names, natural disasters (\eg \myex{storm}), and names that usually do not denote a location (\eg \myex{Friday} or \myex{Friend}).
 To alleviate the negative impact of these unreliable place names, we collected stopwords starting with a standard one and then added 5K most frequent English terms,\footnote{\myurl{http://www.wordfrequency.info}} natural disaster names from Wikipedia and a list of popular personal names.\footnote{\myurl{https://online.justice.vic.gov.au/bdm/popular-names}}
@@ -177,9 +179,8 @@ To alleviate the negative impact of these unreliable place names, we collected s
 After extracting and cleaning the terms from \geoname, the list had over 9.8 million terms.
 The dictionary was used to annotate the tweets using ConceptMapper~\cite{tanenblatt2010conceptmapper} and the \geoname annotation was used as a CRF feature.
 
-On top of refined gazetteers, we also collected country names, state abbreviations, airport IATA codes and place abbreviations (\eg \myex{st} for street) in some English speaking countries from Wikipedia and Google.\footnote{The statistics are available at \myurl{https://github.com/tq010or/alta-shared-task-2014-ibm}}.
-The list is also filtered by stopword removal, \eg Oregon's state abbreviation \myex{OR} is removed.
-This list represents a high quality place names and we separately use them as gazetted features from \geoname.
+On top of refined gazetteers, we also collected country names, state abbreviations, airport IATA codes and place abbreviations (\eg \myex{st} for street) in some English speaking countries from Wikipedia and Google.\footnote{The data is available at \myurl{https://github.com/tq010or/alta-shared-task-2014-ibm}}.
+The list is also filtered by stopword removal so that it represents a high quality place names and we can separately use them as gazetted features from \geoname.
 
 \subsection{Gazetteer Morphology}
 \label{sec:mor_feature}
@@ -200,10 +201,10 @@ Additionally, we also stripped spaces for higher order \ngram for this gazetteer
 The training/dev/test data is offered by ALTA-shared task organisers.
 The collected and filtered tweets correspond to short time period when several disastrous events happened.
 2K tweets are used to training and 1K tweets are randomly selected for dev and test purpose.
-The data set, however, is skewed to a number disastrous events such as New Zealand earthquake and Queensland floods.
+The dataset, however, is skewed to a number disastrous events such as New Zealand earthquake and Queensland floods.
 
 The evaluation metric is mean-F score which averages the F1 number for each tweet.
-In addition to official evaluation metrics, we also present precision, recall and F1 numbers.
+In addition to this official evaluation metric, we also present precision, recall and F1 numbers.
 
 % model settings: BIO, lowercase, 
 We adopted a state-of-the-art CRF implementation named \crfsuite \cite{crfsuite} with default parameters.
@@ -213,13 +214,13 @@ Furthermore, the features are represented in \method{BIO} notation, in which \me
 Using lowercased features and \method{BIO} (instead of \method{BIOLU} \cite{conll09rati}) notations are to avoid potential data sparsity issues in generalisation, as we only have 2K training tweets and many labels such as \myex{\#eqnz} are repeated fairly frequently.
 
 % description of settings (post processing)
-To correct CRF tagging errors and misses, we further imposed some post-processing rules to correct explicit misses made by CRF taggers.
+To correct CRF tagging errors and misses, we further imposed some post-processing rules.
 Words satisfying the following rules are also added as location mentions:
 
 \begin{enumerate}
-\item A word is in the refined \geoname DB or a Twitter-specific entity is a gazetted term combined with an English word;
+\item A word is in the refined \geoname dictionary or a Twitter-specific entity is a gazetted term combined with an English word;
 \item A word is in a closed set of direction names (\eg \myex{north}, \myex{nth} or \myex{north-east}) or location names (\eg \myex{street}, \myex{st});
-\item An URL contains an entry in the refined \geoname DB;
+\item An URL contains an entry in the refined \geoname dictionary;
 \item If the tokens preceding and following \myex{of} are labelled as locations, then the middle \myex{of} is counted as part of a location mention, \eg \myex{north \textbf{of} Brunswick Heads};
 \item \myex{CFA} and \myex{CFS} with the following two words are labelled as location mentions, \eg \myex{CFA district 123}.
 \end{enumerate}
@@ -240,7 +241,7 @@ Evaluation metrics                           & mean-F1 & F1    & P     & R      
 \feature{-Domain}                            & 0.758   & 0.772 & 0.781 & 0.763     & 0.715   & 0.749 & 0.768 & 0.732 \\
 \feature{-Gazetteer}                         & 0.751   & 0.770 & 0.776 & 0.763     & 0.725   & 0.749 & 0.758 & 0.741 \\
 \feature{-Gazetteer Morphology}              & 0.754   & 0.772 & 0.780 & 0.763     & 0.727   & 0.756 & 0.770 & 0.742 \\
-\feature{-Postprocessing}                    & 0.714   & 0.743 & 0.814 & 0.684     & 0.700   & 0.736 & 0.814 & 0.672 \\
+\feature{-Post-processing}                    & 0.714   & 0.743 & 0.814 & 0.684     & 0.700   & 0.736 & 0.814 & 0.672 \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -251,44 +252,45 @@ Evaluation metrics                           & mean-F1 & F1    & P     & R      
 % overall accuracy and inconsistency of dev/test data
 The evaluation numbers for overall and feature ablations are presented in \tabref{tab:fea_exp}.
 Overall, our best tagger achieved 0.758 and 0.726 mean-F1 on dev and test data, respectively.
-The 3\% inconsistency suggests the evaluation data is either not on randomly partitioned or not \method{i.i.d}.
+The 3\% inconsistency suggests the evaluation data is either not on randomly partitioned or not \textit{i.i.d.}
 %TODO: Antonio add some comparison with other's results here?
 
 % useful features and abnormal features
-Among all features, we saw that \feature{Word} and \feature{Postprocessing} are the most important features to NER.
-By contrast, \feature{Domain}, \feature{Gazetteer} and \feature{Gazetteer Morphology} contribute little to the overall performance.
-It makes sense that \feature{Word} are effective features, because many specific tokens (\eg \myex{eqnz}) are strong signals showing the token is a location mention.
-However, it is counter-intuitive that \feature{Gazetteer} and \feature{Gazetteer Morphology} failed to boost the performance \cite{conll09rati,acl11liux}.
-We hypothesise this may be because our CRF model down-weighted \feature{Gazetteer} features, when some location mentions (such as non-gazetted POIs) are not in the refined \geoname and there might be common words that share the same surface forms with entries in \geoname.
+Among all features, we saw that \feature{word} and \feature{post-processing} are the most important features to NER.
+By contrast, \feature{domain}, \feature{gazetteer} and \feature{gazetteer morphology} contribute little to the overall performance.
+It makes sense that \feature{word} are effective features, because many specific tokens (\eg \myex{eqnz}) are strong signals showing the token is a location mention.
+However, it is counter-intuitive that \feature{gazetteer} and \feature{gazetteer Morphology} failed to boost the performance \cite{conll09rati,acl11liux}.
+We hypothesise this may be because our CRF model down-weighted \feature{gazetteer} features, when some location mentions (such as non-gazetted POIs) are not in the refined \geoname and there might be common words that share the same surface forms with entries in \geoname.
 Nonetheless, this doesn't indicate the gazetted data is not useful, but rather it should be integrated appropriately.
-Because when we added gazetted data in the \feature{Postprocessing}, a considerable boost in performance is observed.
+Because when we added gazetted data in the \feature{post-processing}, a considerable boost in performance is observed.
 
-Notably, \feature{Capitalisation} and \feature{POS} are useful in identifying location mentions.
+Notably, \feature{capitalisation} and \feature{POS} are useful in identifying location mentions.
 This suggests developing reliable capitalisation restoration and NLP pipeline will be beneficial to downstream NER.
 
 \section{Error Analysis}
 \label{sec:error_analysis}
 %% We could talk about the issues with our approach
 
+%TODO: I think I can offer you our best run results and you may double check whether the examples are still correct. Current discussion is based on our last submission (second to the best).
 Our system incorrectly identified some tokens as locations.
 Most of the false positives were due to CRF mistakes.
 Examples of these mistakes are annotation of tokens like \myex{bushfires}, 
-Probably a larger data set would allow the CRF model to avoid these mistakes.
+Probably a larger dataset would allow the CRF model to avoid these mistakes.
 On the other hand, many false positives produced by our system look as genuine locations.
 For instance, \myex{bakery} was not annotated in \myex{Chinatown bakery} but is was annotated in \myex{Manchester Wong Wong's bakery} a few tweets below.
-Some locations such as \myex{Kumbarilla State Forest} or \myex{Shire of Carnar} seem to be false positives as well.
-Possibly the noise in the data set is also responsible for errors produced by our CRF tagger.
+Some locations such as \myex{Kumbarilla State Forest} seem to be false positives as well.
+Possibly the noise in the dataset is also responsible for errors produced by our CRF tagger.
 
 
-Even with our best efforts to remove location names that would not typically denote a location, there are some \geoname locations in our dictionary that typically do not denote a location, e.g.~\myex{The End of the World}.
+Even with our best efforts to remove location names that would not typically denote a location, there are some \geoname locations in our dictionary that typically do not denote a location, \eg \myex{The End of the World}.
 
-Our system missed some Twitter user names or hashtags with location information (e.g. \myex{@FireRescueNSW}, \myex{@abcsouthqld}, \myex{\#NZquake})
-These locations contain an acronym or abbreviation denoting a location as prefix or suffix of a word that was not in our dictionary.
-For some locations, the acronym or abbreviation denoting a location was not in our location dictionary (e.g. \myex{Melb}).
+Our system missed some Twitter user names or hashtags with location information, \eg \myex{@FireRescueNSW}, \myex{@abcsouthqld}.
+Although these locations contain an acronym or abbreviation denoting a location as prefix or suffix, the rest part is not a valid single word in our English lexicon.
+For some locations, their variants were not in our location dictionary, \eg \myex{Melb} for \myex{Melbourne}.
 
 Some location names were not in our \geoname dictionary and nor were they identified by the CRF.
 Examples of these location names include \myex{Coal Quay}, \myex{Pretty Bach} or \myex{Massabielle grotto}.
-Some two letter US state abbreviations were not recognised by our system, e.g. \myex{OR}, \myex{IR} or \myex{MT}; this could possibly be alleviated by less aggressively filtering the stopwords such as \myex{OR} from the gazetteer but this would in many cases result in many false positives.
+Some two letter US state abbreviations were not recognised by our system, \eg \myex{OR}, \myex{IR} or \myex{MT}; this could possibly be alleviated by less aggressively filtering the stopwords such as \myex{OR} from the gazetteer but this would in many cases result in many false positives.
 
 In a few cases, our system missed part of the location name when it was a generic location token attached to a specific named location.
 For instance, \myex{markets} was not annotated in \myex{Kelvin Grove markets} and \myex{grounds} was not annotated in \myex{UTS grounds}.
@@ -306,9 +308,9 @@ Alternatively, this may be due to the high noise/signal ratio, \ie expanding ori
 
 Additionally, we also tried semi-supervised learning by first training a CRF model to annotate locations in a large amount of unseen new tweets, then feeding all locations and tweets into a CRF learner to train a new model for future tagging.
 This approach didn't show improvement either.
-We hypothesise that this is due to the the data set being skewed towards disaster-related location mentions, adding more training data from general tweets does not improve the results.
-We plan to explore these reasons in the future work.
- % DO WE?
+We hypothesise that this is due to the dataset being skewed towards disaster-related location mentions, adding more training data from general tweets does not improve the results.
+%We plan to explore these reasons in the future work.
+ % DO WE? No we don't, so I commented the text
 
 \section{Conclusion and Future Work}
 \label{sec:conclusion}
