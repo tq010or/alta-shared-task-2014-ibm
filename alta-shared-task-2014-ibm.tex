@@ -65,7 +65,7 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-    This paper describes a participant system in ALTA shared task 2014.
+    This paper describes our system in the ALTA shared task 2014.
     The task is to identify location mentions in Twitter messages, such as place names and point-of-interests (POIs).
     We formulated the task as a sequential labelling problem, and explored various features on top of a conditional random field (CRF) classifier.
     The system achieved 0.726 mean-F measure on the held-out evaluation data.
@@ -77,7 +77,7 @@
 The ALTA shared task 2014 aims to identify location mentions in Twitter data.
 The input is plain text messages, and the expected output is location entities such as country names, city names and POIs for each message.
 For instance, \myex{Auckland} and \myex{\#eqnz} are identified as location mentions in \myex{@USER are you considering an Auckland visit after \#eqnz today?}.\footnote{\myex{\#eqnz} is a short form for earthquake in New Zealand.}
-This shared task is very much similar to a well-established NLP task --- named entity recognition (NER) but with a focus on location entities.
+This shared task is very similar to a well-established NLP task --- named entity recognition (NER) but with a focus on location entities.
 Each token in a text message is categorised as either a location mention or not.
 The nearby tokens (\ie context) may influence a token's labelling, hence we incorporate context information in our system.
 Following the literature on NER \cite{wwwc13ling}, we formulate it as a sequential labelling task and use a conditional random field (CRF) as the classifier.
@@ -109,7 +109,7 @@ For this reason, widely-used NER features may need to be re-engineered somewhat 
 
 \subsection{Related work for NER}
 \label{sec:literature}
-The starting point for our classification features comes from some other representative systems which are summarised in \tabref{tab:fea_comp}.
+The starting point for our features comes from some other representative systems that are summarised in \tabref{tab:fea_comp}.
 
 %TODO: I feel like we don't need to talk on Gibbs sampling, however, their recommended citation highlights this non-local features.
 \stanford NER combined Gibbs sampling and a widely used CRF model \cite{acl05fink}.
@@ -159,7 +159,7 @@ Features                                     & \stanford & \msra & \washington \
 Based on the previous representative NER work, we considered the following features:
 
 \begin{itemize}
-    \item \feature{Word}. Lowercased word types are included as a default feature as suggested by existing systems. Previous and next two words are also included to capture local context information. Larger context window size is not considered as Twitter data is fairly terse and ungrammatical \cite{baldwin2013}, so incorporating long distance context may bring little context information but introduce more noise.
+    \item \feature{Word}. Lowercased word types are included as a default feature as suggested by existing systems. Previous and next two words are also included to capture local context information. Larger context window size is not considered as Twitter data is fairly terse and ungrammatical \cite{baldwin2013}, so incorporating long distance context may bring little context information and introduce more noise.
     \item \feature{POS}. Based on the fact that location named entities are primarily nouns. A reliable POS tagger generates valuable clues for locations. Instead of re-building an NLP pipeline, we adopt an off-the-shelf Twitter POS tagger \cmu that generates coursed-grained POS tags with high accuracy ($\ge$ 90\%) \cite{naacl13owop}. Similar to \feature{word}, the previous and next two \feature{POS} tags are also included. We also consider \feature{POS} bigrams.
     \item \feature{Capitalisation}. Instead of predicting token case in Twitter (\eg \cite{emnlp11ritt}), four types of capitalisation information are retrieved based on the original surface form. Namely, they are all character uppercased (AU), all character lowercased (AL), first character uppercased and the rest are lowercased (UL) and mixed capitalisation (MC). We also consider \feature{capitalisation} bigrams.
     \item \feature{Domain}. Twitter specific entities such as user mentions, hashtags and URLs are considered as normal words. This is because many location mentions are embedded in these entities. For instance, \myex{@Iran}, \myex{\#brisbane} and \myurl{http:www.abc.net.au/melbourne/}. Furthermore, we distinguish whether a word is in a stop word or not. Moreover, some location clues such as \myex{street} are also categorised as task-specific features in this feature group.
@@ -171,14 +171,13 @@ Based on the previous representative NER work, we considered the following featu
 \label{sec:gaze_feature}
 
 We adopted \geoname as our primary source of gazetted features.
-
 %TODO: why filtering generates more entries? before filtering is 8M , after filing is 9.8M? Please double check
 It is a geographical database with information about all countries with over eight million places, such as cities and points of interest.\footnote{\geoname site: \myurl{http://www.geonames.org}} 
 However, as noted by \newcite{acl11liux}, some place names are also commonly used to denote something other than a location.
 Examples of these terms include people's names, natural disasters (\eg \myex{storm}), and names that usually do not denote a location (\eg \myex{Friday} or \myex{Friend}).
 To alleviate the negative impact of these unreliable place names, we collected stopwords starting with a standard one and then added 5K most frequent English terms,\footnote{\myurl{http://www.wordfrequency.info}} natural disaster names from Wikipedia and a list of popular personal names.\footnote{\myurl{https://online.justice.vic.gov.au/bdm/popular-names}}
 
-After extracting and cleaning the terms from \geoname, the list had over 9.8 million terms\footnote{Locations might have more than one name to include name variants.}.
+After extracting and cleaning the terms from \geoname, the list had over 9.8 million terms\footnote{Locations might have more than one name to include variants.}.
 The dictionary was used to annotate the tweets using ConceptMapper~\cite{tanenblatt2010conceptmapper} and the \geoname annotation was used as a CRF feature.
 
 On top of refined gazetteers, we also collected country names, state abbreviations, airport IATA codes and place abbreviations (\eg \myex{st} for street) in some English speaking countries from Wikipedia and Google.\footnote{The data is available at \myurl{https://github.com/tq010or/alta-shared-task-2014-ibm}}.
@@ -203,7 +202,7 @@ Additionally, we also stripped spaces for higher order \ngram for this gazetteer
 The training/dev/test data is offered by ALTA-shared task organisers.
 The collected and filtered tweets correspond to short time period when several disastrous events happened.
 2K tweets are used to training and 1K tweets are randomly selected for dev and test purpose.
-The dataset, however, is skewed to a number disastrous events such as New Zealand earthquake and Queensland floods.
+The data set, however, is skewed to a number disastrous events such as New Zealand earthquake and Queensland floods.
 
 The evaluation metric is mean-F score which averages the F1 number for each tweet.
 In addition to this official evaluation metric, we also present precision, recall and F1 numbers.
@@ -262,11 +261,9 @@ The 3\% inconsistency suggests the evaluation data is either not on randomly par
 
 %TODO: Antonio, could you please add some comparison with other's results here?
 %TODO [Antonio] I added some comments but I find it difficult to comment since we are not aware of others' implementations and I have found some disagreements in their recently published results.
-Kaggle's site shows the results on the test set of our system compared to other systems\footnote{Challenge results on the test set: \myurl{https://inclass.kaggle.com/c/alta-2014-challenge/leaderboard}}.
-The results are lower compared to the mean-F1 reported in \tabref{tab:fea_exp} (0.726 vs 0.712), which might require further investigation.
-Compared to results from other participants, our system seems to perform below other systems which is not difficult to discuss since we are not aware of the implementation of other participants' systems.
-In our own results we find large disagreements between the results on the dev and test data which might indicate that there is a large difference between the sets and that larger training sets are required to avoid overfitting.
-Results on the public and private\footnote{Public and private split of the test set: \myurl{https://inclass.kaggle.com/c/alta-2014-challenge/forums/t/10702/and-the-winner-is/57341#post57341}} further show this disagreement on different partitions of the data set.
+Kaggle's site shows the results on the test set of our system compared to other systems\footnote{Challenge results on the Dev set: \myurl{https://inclass.kaggle.com/c/alta-2014-challenge/leaderboard}}\footnote{Public and private split of the test set: \myurl{https://inclass.kaggle.com/c/alta-2014-challenge/forums/t/10702/and-the-winner-is/57341#post57341}}.
+Compared to results from other participants, our system seems to perform below other participating systems, which is cannot be discussed since we are not aware of the implementation of the other systems.
+In our own results, we find large disagreements between the results on the dev and test data (0.758 vs 0.726), which might indicate that there is a large difference between the sets and that larger training sets are required to avoid overfitting or that additional sets of features might be considered.
 
 % useful features and abnormal features
 Among all features, we saw that \feature{word} and \feature{post-processing} are the most important features to NER.
@@ -288,11 +285,11 @@ This suggests developing reliable capitalisation restoration and NLP pipeline wi
 Our system incorrectly identified some tokens as locations.
 Most of the false positives were due to CRF mistakes.
 Examples of these mistakes are annotation of tokens like \myex{bushfires}, 
-Probably a larger dataset would allow the CRF model to avoid these mistakes.
+Probably a larger data set would allow the CRF model to avoid these mistakes.
 On the other hand, many false positives produced by our system look as genuine locations.
 For instance, \myex{bakery} was not annotated in \myex{Chinatown bakery} but is was annotated in \myex{Manchester Wong Wong's bakery} a few tweets below.
 Some locations such as \myex{Kumbarilla State Forest} seem to be false positives as well.
-Possibly the noise in the dataset is also responsible for errors produced by our CRF tagger.
+Possibly the noise in the data set is also responsible for errors produced by our CRF tagger.
 
 
 Even with our best efforts to remove location names that would not typically denote a location, there are some \geoname locations in our dictionary that typically do not denote a location, \eg \myex{The End of the World}.
@@ -302,8 +299,8 @@ Although these locations contain an acronym or abbreviation denoting a location 
 For some locations, their variants were not in our location dictionary, \eg \myex{Melb} for \myex{Melbourne}.
 
 Some location names were not in our \geoname dictionary and nor were they identified by the CRF.
-Examples of these location names include \myex{Coal Quay}, \myex{Pretty Bach} or \myex{Massabielle grotto}.
-Some two letter US state abbreviations were not recognised by our system, \eg \myex{OR}, \myex{IR} or \myex{MT}; this could possibly be alleviated by less aggressively filtering the stopwords such as \myex{OR} from the gazetteer but this would in many cases result in many false positives.
+Examples of these location names include \myex{Coal Quay} or \myex{Massabielle grotto}.
+Some two letter US state abbreviations were not recognised by our system, \eg \myex{OR} or \myex{ID}; this could possibly be alleviated by less aggressively filtering the stopwords such as \myex{OR} from the gazetteer but this would in many cases result in many false positives.
 
 In a few cases, our system missed part of the location name when it was a generic location token attached to a specific named location.
 For instance, \myex{markets} was not annotated in \myex{Kelvin Grove markets} and \myex{grounds} was not annotated in \myex{UTS grounds}.
@@ -321,7 +318,7 @@ Alternatively, this may be due to the high noise/signal ratio, \ie expanding ori
 
 Additionally, we also tried semi-supervised learning by first training a CRF model to annotate locations in a large amount of unseen new tweets, then feeding all locations and tweets into a CRF learner to train a new model for future tagging.
 This approach didn't show improvement either.
-We hypothesise that this is due to the dataset being skewed towards disaster-related location mentions, adding more training data from general tweets does not improve the results.
+We hypothesise that this is due to the data set being skewed towards disaster-related location mentions, adding more training data from general tweets does not improve the results.
 %We plan to explore these reasons in the future work.
  % DO WE? No we don't, so I commented the text
 
