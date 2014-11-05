@@ -67,7 +67,7 @@
     This paper describes a participant system in ALTA shared task 2014.
     The task is to identify location mentions in Twitter messages, such as place names and point-of-interests (POIs).
     We formulated the task as a sequential labelling problem, and explored various features on top of a conditional random field (CRF) classifier.
-    The system achieved 0.712 mean-F measure on the held-out evaluation data.
+    The system achieved 0.726 mean-F measure on the held-out evaluation data.
     We discuss our results and suggest ideas for future work on location mention recognition in social media.
 \end{abstract}
 
@@ -156,12 +156,12 @@ Features                                     & \stanford & \msra & \washington \
 Based on the previous representative NER work, we considered the following features:
 
 \begin{itemize}
-    \item \feature{Word}. Lowercased word types are included as a default feature as suggested by existing systems. Previous and next words are also included to capture local context information. Larger context window size is not considered as Twitter data is fairly terse and ungrammatical \cite{baldwin2013}, so incorporating long distance context may bring little context information but introduce more noise.
-    \item \feature{POS}. Based on the fact that location named entities are primarily nouns. A reliable POS tagger generates valuable clues for locations. Instead of re-building an NLP pipeline, we adopt an off-the-shelf Twitter POS tagger \cmu that generates coursed-grained POS tags with high accuracy ($\ge$ 90\%) \cite{naacl13owop}. Similar to \feature{Word}, the previous and next \feature{POS} tags are also included.
-    \item \feature{Capitalisation}. Instead of normalising token case in Twitter (\eg \cite{emnlp11ritt}), four types of capitalisation information are retrieved based on the original surface form. Namely, they are all character uppercased (AU), all character lowercased (AL), first character uppercased and the rest are lowercased (UL) and mixed capitalisation (MC). 
-    \item \feature{Domain}. Twitter specific entities such as user mentions, hashtags and URLs are considered as normal words. This is because many location mentions are embedded in these entities. For instance, \myex{@Iran}, \myex{\#brisbane} and \myurl{http:www.abc.net.au/melbourne/}.
+    \item \feature{Word}. Lowercased word types are included as a default feature as suggested by existing systems. Previous and next two words are also included to capture local context information. Larger context window size is not considered as Twitter data is fairly terse and ungrammatical \cite{baldwin2013}, so incorporating long distance context may bring little context information but introduce more noise.
+    \item \feature{POS}. Based on the fact that location named entities are primarily nouns. A reliable POS tagger generates valuable clues for locations. Instead of re-building an NLP pipeline, we adopt an off-the-shelf Twitter POS tagger \cmu that generates coursed-grained POS tags with high accuracy ($\ge$ 90\%) \cite{naacl13owop}. Similar to \feature{Word}, the previous and next two \feature{POS} tags are also included. We also consider \feature{POS} bigrams.
+    \item \feature{Capitalisation}. Instead of normalising token case in Twitter (\eg \cite{emnlp11ritt}), four types of capitalisation information are retrieved based on the original surface form. Namely, they are all character uppercased (AU), all character lowercased (AL), first character uppercased and the rest are lowercased (UL) and mixed capitalisation (MC). We also consider \feature{Capitalisation} bigrams.
+    \item \feature{Domain}. Twitter specific entities such as user mentions, hashtags and URLs are considered as normal words. This is because many location mentions are embedded in these entities. For instance, \myex{@Iran}, \myex{\#brisbane} and \myurl{http:www.abc.net.au/melbourne/}. Furthermore, we distinguish whether a word is in a stop word or not. Moreover, some location clues such as \myex{street} are identified as in-domain task-specific features.
     \item \feature{Gazetteer}. Literature has shown that external gazetted resources are helpful in identifying named entities. Therefore, we incorporate features based on external place names, \eg whether a current word is in a refined list of place names. Details are discussed in \secref{sec:gaze_feature}.
-    \item \feature{Gazetteer Morphology}. As an extension of previous \feature{gazetteer} features, we also observed that gazetted names may form part of a token and this is particularly common for Twitter specific entities, \eg \myex{\#IranEQ} and \myex{@zdnetaustralia}. As a result, we also perform partial matching of string in \secref{sec:mor_feature}.
+    \item \feature{Gazetteer Morphology}. As an extension of previous \feature{gazetteer} features, we also observed that gazetted names may form part of a token and this is particularly common for Twitter specific entities, \eg \myex{\#IranEQ} and \myex{@zdnetaustralia}. As a result, we also perform partial matching of string in \secref{sec:mor_feature}. 
 \end{itemize}
 
 \subsection{Gazetteers}
@@ -316,7 +316,7 @@ In this paper, we described our system in participating ALTA-shared 2014 task --
 We formulated the problem as a location entity recognition task to scope our efforts in NER literature.
 Having examined and compared NER feature of existing systems, we proposed our own feature set with justifications.
 We further built a CRF-based location mention tagger and analysed the feature contributions.
-Overall, our tagger achieved 0.712 mean-F1 in the shared task.
+Overall, our tagger achieved 0.726 mean-F1 in the shared task.
 Although our extension experiments both show negative results, there is certainly room for further improvements.
 Our discussion and error analysis shed light on the future work in this research topic
 
