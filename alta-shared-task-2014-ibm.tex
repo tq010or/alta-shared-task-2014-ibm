@@ -7,6 +7,7 @@
 \usepackage{xspace}
 \usepackage{amsmath,relsize}
 \usepackage{pifont}
+\usepackage{booktabs}
 \usepackage{enumitem}
 
 \newcommand{\eg}{e.g.,\xspace}
@@ -130,9 +131,9 @@ They adopted rich information generated in the pipeline, such as POS tags, chunk
 \begin{table*}[!htbp]
 \begin{center}
 \begin{tabular}{lccc}
-\hline 
+\toprule
 Features                                     & \stanford & \msra & \washington \\ 
-\hline
+\midrule
 \feature{Word}                               & \cmark & \cmark & \cmark \\
 \feature{Word Context}                       & \cmark & \cmark & \cmark \\
 \feature{Word Morphology}                    & Character \ngram  & Affix & Brown Cluster \\
@@ -141,7 +142,7 @@ Features                                     & \stanford & \msra & \washington \
 \feature{Chunking}                           & \xmark & \xmark & in-domain chunker \\
 \feature{Capitalisation}                     & \xmark & \cmark & in-domain capitalisation restoration\\
 \feature{Gazetteers}                         & \xmark & Wikipedia & Freebase \\
-\hline
+\bottomrule
 \end{tabular}
 \end{center}
 \caption{Features comparison of representative NER Systems}
@@ -202,7 +203,7 @@ The collected and filtered tweets correspond to short time period when several d
 The data set, however, is skewed to a number disastrous events such as New Zealand earthquake and Queensland floods.
 
 The evaluation metric is mean-F score which averages the F1 number for each tweet.
-In addition to official evaluation metrics, we also present numbers in a confusion matrix, \ie true positive (TP), false positive (FP), true negative (TN) and false negative (FN).
+In addition to official evaluation metrics, we also present precision, recall and F1 numbers.
 
 % model settings: BIO, lowercase, 
 We adopted a state-of-the-art CRF implementation named \crfsuite \cite{crfsuite} with default parameters.
@@ -224,31 +225,46 @@ Words satisfying the following rules are also added as location mentions:
 \end{enumerate}
 
 
-The evaluation numbers for overall and feature ablations are presented in \tabref{tab:fea_exp}.
-%TODO: fill in numbers of full experiments and feature ablations
 \begin{table*}[!htbp]
 \begin{center}
-\begin{tabular}{lccccc}
-\hline 
-Features                                     & mean-F1 & TP & FP & TN & FN \\ 
-\hline
-\feature{Overall}                            & & & & &  \\
-\feature{-Word}                              & & & & &  \\
-\feature{-POS}                               & & & & &  \\
-\feature{-Capitalisation}                    & & & & &  \\
-\feature{-Domain}                            & & & & &  \\
-\feature{-Gazetteer}                         & & & & &  \\
-\feature{-Gazetteer Morphology}              & & & & &  \\
-\feature{-Postprocessing}                    & & & & &  \\
-\hline
+\begin{tabular}{lcccccccc}
+\toprule
+Data                                         & \multicolumn{4}{c}{Dev}             & \multicolumn{4}{c}{Test}        \\
+\cmidrule{2-9}
+Evaluation metrics                           & mean-F1 & F1    & P     & R         & mean-F1 & F1    & P     & R     \\ 
+\midrule
+\feature{Overall}                            & 0.758   & 0.774 & 0.784 & 0.764     & 0.726   & 0.756 & 0.770 & 0.742 \\
+\feature{-Word}                              & 0.716   & 0.738 & 0.717 & 0.760     & 0.683   & 0.715 & 0.702 & 0.729 \\
+\feature{-POS}                               & 0.744   & 0.767 & 0.780 & 0.755     & 0.713   & 0.742 & 0.772 & 0.715 \\
+\feature{-Capitalisation}                    & 0.748   & 0.761 & 0.769 & 0.752     & 0.723   & 0.753 & 0.769 & 0.737 \\
+\feature{-Domain}                            & 0.758   & 0.772 & 0.781 & 0.763     & 0.715   & 0.749 & 0.768 & 0.732 \\
+\feature{-Gazetteer}                         & 0.751   & 0.770 & 0.776 & 0.763     & 0.725   & 0.749 & 0.758 & 0.741 \\
+\feature{-Gazetteer Morphology}              & 0.754   & 0.772 & 0.780 & 0.763     & 0.727   & 0.756 & 0.770 & 0.742 \\
+\feature{-Postprocessing}                    & 0.714   & 0.743 & 0.814 & 0.684     & 0.700   & 0.736 & 0.814 & 0.672 \\
+\bottomrule
 \end{tabular}
 \end{center}
 \caption{Overall experiment results and feature ablations}
 \label{tab:fea_exp}
 \end{table*}
 
-%TODO: do feature contribution analysis, I need to check the results for the discussion.
-Among all features, we saw that ...
+% overall accuracy and inconsistency of dev/test data
+The evaluation numbers for overall and feature ablations are presented in \tabref{tab:fea_exp}.
+Overall, our best tagger achieved 0.758 and 0.726 mean-F1 on dev and test data, respectively.
+The 3\% inconsistency suggests the evaluation data is either not on randomly partitioned or not \method{i.i.d}.
+%TODO: Antonio add some comparison with other's results here?
+
+% useful features and abnormal features
+Among all features, we saw that \feature{Word} and \feature{Postprocessing} are the most important features to NER.
+By contrast, \feature{Domain}, \feature{Gazetteer} and \feature{Gazetteer Morphology} contribute little to the overall performance.
+It makes sense that \feature{Word} are effective features, because many specific tokens (\eg \myex{eqnz}) are strong signals showing the token is a location mention.
+However, it is counter-intuitive that \feature{Gazetteer} and \feature{Gazetteer Morphology} failed to boost the performance \cite{conll09rati,acl11liux}.
+We hypothesise this may be because our CRF model down-weighted \feature{Gazetteer} features, when some location mentions (such as non-gazetted POIs) are not in the refined \geoname and there might be common words that share the same surface forms with entries in \geoname.
+Nonetheless, this doesn't indicate the gazetted data is not useful, but rather it should be integrated appropriately.
+Because when we added gazetted data in the \feature{Postprocessing}, a considerable boost in performance is observed.
+
+Notably, \feature{Capitalisation} and \feature{POS} are useful in identifying location mentions.
+This suggests developing reliable capitalisation restoration and NLP pipeline will be beneficial to downstream NER.
 
 \section{Error Analysis}
 \label{sec:error_analysis}
@@ -282,7 +298,7 @@ For instance, \myex{markets} was not annotated in \myex{Kelvin Grove markets} an
 
 In addition to standard CRF experiments and feature ablation analysis, we also tried to improve the accuracy from two extensions.
 First, we leveraged embedded topics to represent features, \ie a feature is represented by the distribution of a limited number of related topics.
-The feature to topic distribution map is generated on a larger number of English tweets using \wordvec.
+The feature to topic distribution map is generated on a larger number of English tweets using \wordvec.\footnote{\myurl{https://code.google.com/p/word2vec/}}
 The results, compared with the CRF experiments, turn to be negative or minor positive in various settings.
 We infer this may be due to the sub-domain difference in the representation.
 We used general English tweets from Twitter Streaming API to obtain the embedded topics, which is different from disaster-related tweets with location mentions.
