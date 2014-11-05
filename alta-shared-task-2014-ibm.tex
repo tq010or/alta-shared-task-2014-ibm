@@ -173,12 +173,12 @@ Based on the previous representative NER work, we considered the following featu
 We adopted \geoname as our primary source of gazetted features.
 
 %TODO: why filtering generates more entries? before filtering is 8M , after filing is 9.8M? Please double check
-It is a geographical database with information about all countries with over eight million place names, such as city names and points of interest.\footnote{\geoname site: \myurl{http://www.geonames.org}} 
+It is a geographical database with information about all countries with over eight million places, such as cities and points of interest.\footnote{\geoname site: \myurl{http://www.geonames.org}} 
 However, as noted by \newcite{acl11liux}, some place names are also commonly used to denote something other than a location.
 Examples of these terms include people's names, natural disasters (\eg \myex{storm}), and names that usually do not denote a location (\eg \myex{Friday} or \myex{Friend}).
 To alleviate the negative impact of these unreliable place names, we collected stopwords starting with a standard one and then added 5K most frequent English terms,\footnote{\myurl{http://www.wordfrequency.info}} natural disaster names from Wikipedia and a list of popular personal names.\footnote{\myurl{https://online.justice.vic.gov.au/bdm/popular-names}}
 
-After extracting and cleaning the terms from \geoname, the list had over 9.8 million terms.
+After extracting and cleaning the terms from \geoname, the list had over 9.8 million terms\footnote{Locations might have more than one name to include name variants.}.
 The dictionary was used to annotate the tweets using ConceptMapper~\cite{tanenblatt2010conceptmapper} and the \geoname annotation was used as a CRF feature.
 
 On top of refined gazetteers, we also collected country names, state abbreviations, airport IATA codes and place abbreviations (\eg \myex{st} for street) in some English speaking countries from Wikipedia and Google.\footnote{The data is available at \myurl{https://github.com/tq010or/alta-shared-task-2014-ibm}}.
@@ -229,6 +229,7 @@ Words satisfying the following rules are also added as location mentions:
 
 
 %TODO: do we want to highlight the numbers?
+%TODO [Antonio] Yes, what is the configuration used for our ALTA submission?
 \begin{table*}[!htbp]
 \begin{center}
 \begin{tabular}{lcccccccc}
@@ -238,6 +239,8 @@ Data                                         & \multicolumn{4}{c}{Dev}          
 Evaluation metrics                           & mean-F1 & F1    & P     & R         & mean-F1 & F1    & P     & R     \\ 
 \midrule
 \feature{Overall}                            & 0.758   & 0.774 & 0.784 & 0.764     & 0.726   & 0.756 & 0.770 & 0.742 \\
+% [Antonio] I added this to separate the ALTA results from the other experiments
+\hline
 \feature{-Word}                              & 0.716   & 0.738 & 0.717 & 0.760     & 0.683   & 0.715 & 0.702 & 0.729 \\
 \feature{-POS}                               & 0.744   & 0.767 & 0.780 & 0.755     & 0.713   & 0.742 & 0.772 & 0.715 \\
 \feature{-Capitalisation}                    & 0.748   & 0.761 & 0.769 & 0.752     & 0.723   & 0.753 & 0.769 & 0.737 \\
@@ -258,6 +261,12 @@ Overall, our best tagger achieved 0.758 and 0.726 mean-F1 on dev and test data, 
 The 3\% inconsistency suggests the evaluation data is either not on randomly partitioned or not \textit{i.i.d.}
 
 %TODO: Antonio, could you please add some comparison with other's results here?
+%TODO [Antonio] I added some comments but I find it difficult to comment since we are not aware of others' implementations and I have found some disagreements in their recently published results.
+Kaggle's site shows the results on the test set of our system compared to other systems\footnote{Challenge results on the test set: \myurl{https://inclass.kaggle.com/c/alta-2014-challenge/leaderboard}}.
+The results are lower compared to the mean-F1 reported in \tabref{tab:fea_exp} (0.726 vs 0.712), which might require further investigation.
+Compared to results from other participants, our system seems to perform below other systems which is not difficult to discuss since we are not aware of the implementation of other participants' systems.
+In our own results we find large disagreements between the results on the dev and test data which might indicate that there is a large difference between the sets and that larger training sets are required to avoid overfitting.
+Results on the public and private\footnote{Public and private split of the test set: \myurl{https://inclass.kaggle.com/c/alta-2014-challenge/forums/t/10702/and-the-winner-is/57341#post57341}} further show this disagreement on different partitions of the data set.
 
 % useful features and abnormal features
 Among all features, we saw that \feature{word} and \feature{post-processing} are the most important features to NER.
