@@ -61,17 +61,17 @@
     The task is to identify location mentions in Twitter messages, such as place names and point-of-interests (POIs).
     We formulated the task as a sequential labelling problem, and explored various features on top of a conditional random field (CRF) classifier.
     The system achieved 0.712 mean-F measure on the held-out evaluation data.
-    We discussed our results and provided future work on named entity recognition in social media.
+    We discuss our results and suggest ideas for future work on location mention recognition in social media.
 \end{abstract}
 
 \section{Introduction}
 \label{sec:intro}
-The ALTA shared task 2014 aims to identify place mentions in Twitter data.
-The input is plain text messages, and the expected output is location entities such as country names, city names and POIs for each corresponding messages.
-For instance, \myex{Auckland} and \myex{\#eqnz} are identified as location mentions in \myex{@USER are you considering an Auckland visit after \#eqnz today?}.\footnote{\myex{\#eqnz} is short for earthquake in New Zealand.}
-This shared task is very much similar to a well-established NLP task --- named entity recognition (NER) with a focus on location entities.
-For each token in a text message, it is categorised as either a location mention or not.
-The nearby words (\ie context) may influence a word's labelling, hence we incorporate context information in our system.
+The ALTA shared task 2014 aims to identify location mentions in Twitter data.
+The input is plain text messages, and the expected output is location entities such as country names, city names and POIs for each message.
+For instance, \myex{Auckland} and \myex{\#eqnz} are identified as location mentions in \myex{@USER are you considering an Auckland visit after \#eqnz today?}.\footnote{\myex{\#eqnz} is a short form for earthquake in New Zealand.}
+This shared task is very much similar to a well-established NLP task --- named entity recognition (NER) but with a focus on location entities.
+Each token in a text message is categorised as either a location mention or not.
+The nearby tokens (\ie context) may influence a token's labelling, hence we incorporate context information in our system.
 Following the literature on NER \cite{wwwc13ling}, we formulate it as a sequential labelling task and use a conditional random field (CRF) as the classifier.
 
 The main contributions of the paper are:
@@ -85,7 +85,7 @@ Although CRF models for NER are widely used and are reported to achieve state-of
 
 First, social media text is noisy.
 It contains many non-standard words including typos (\eg \lexpair{challanges}{challenges}), abbreviations (\eg \lexpair{ppl}{people}) and phonetic substitutions (\eg \lexpair{4eva}{forever}).
-These non-standard words often cause generalisation issue \cite{acl11han}.
+These non-standard words often cause generalisation issues \cite{acl11han}.
 For instance, lexical variants (\eg \myex{Melb}, \myex{Mel}, \myex{melbn}) won't be recognised in the test data when only standard forms (\eg \mygl{Melbourne}) are observed in the training data.
 
 In addition to non-standard words, informal and colloquial writing style further challenges the NER accuracy.
@@ -102,7 +102,7 @@ To this end, widely-used NER features require to be re-examined in social media.
 \section{Feature Engineering}
 \label{sec:feature}
 
-\subsection{Brief Litearture on NER Feature Enginnering}
+\subsection{Brief Literature on NER Feature Engineering}
 \label{sec:literature}
 We engineer features by reviewing some representative systems.
 The main features of representative systems are summarised in \tabref{tab:fea_comp}.
@@ -115,8 +115,8 @@ The word and POS tag features also includes the surrounding tokens and tags to c
 \newcite{acl11liux} proposed a two-stage CRF-based tagger \msra for Twitter NER.
 First, a \textit{k}-NN classifier pre-categorises words, and then feeds results to a downstream CRF modeller.
 The features they adopted in \textit{k}-NN are two word text windows including the target word (\ie five words in total).
-The gazetted resources (from Wikipedia) are also utilised and shown effective in their experiments.
-As for the features for building the second stage CRF model, they follow \newcite{conll09rati} and made use of words tokens, word types (\eg whether the word is alphanumeric or capitalised?), word morphological features (\eg suffix and prefix of words), previous tagging labels, word context windows, and conjunction features that combine both tags and word context windows.
+The gazetted resources (from Wikipedia) are also utilised and have shown effective results in their experiments.
+As for the features for building the second stage CRF model, they follow \newcite{conll09rati} and made use of tokens, word types (\eg whether the word is alphanumeric or capitalised?), word morphological features (\eg suffix and prefix of words), previous tagging labels, word context windows, and conjunction features that combine both tags and word context windows.
 %Among various extensions on their experiments, they also found gazetteers are quite helpful on both social media and existing datasets.
 %Clustering lexical variants seems a complex story, it doesn't show clear improvement on social media dataset (as reported), but bears much improvements on the conventional datasets.
 
@@ -149,7 +149,8 @@ Features                                     & \stanford & \msra & \washington \
 \subsection{Proposed Features}
 \label{sec:basic_feature}
 
-Based on the previous representative NER work, we select our features with justifications as follows:
+Based on the previous representative NER work, we considered the following features:
+
 \begin{itemize}
     \item \feature{Word}. Lowercased word types are included as a default feature as suggested by existing systems. Previous and next words are also included to capture local context information. Larger context window size is not considered as Twitter data is quite terse and ungrammatical, incorporating long distance context may bring little context information but introduce more noise;
     \item \feature{POS}. Based on the fact that location named entities are primarily nouns. A reliable POS tagger generates valuable clues for locations. Instead of re-building an NLP pipeline, we adopt an off-the-shelf Twitter POS tagger \cmu that generates coursed-grained POS tags with high accuracy ($\ge$ 90\%) \cite{naacl13owop}. Similar to \feature{Word}, the previous and next \feature{POS} tags are also included.
@@ -163,7 +164,7 @@ Based on the previous representative NER work, we select our features with justi
 \label{sec:gaze_feature}
 
 We adopted \geoname as our primary source of gazetted features.
-It is a geographical database with information about all countries with over eight million place names, such as city names and points of interest (POI).\footnote{GeoNames site: \myurl{http://www.geonames.org}} 
+It is a geographical database with information about all countries with over eight million place names, such as city names and points of interest.\footnote{GeoNames site: \myurl{http://www.geonames.org}} 
 However, as noted by \newcite{acl11liux}, some place names are used as well commonly without denoting a location.
 Examples of these terms include person names, natural disasters (\eg \myex{storm}), and names that usually do not denote a location (\eg \myex{Friday} or \myex{Friend}).
 To alleviate the negative impact of these unreliable place names, we collected stopwords starting with a standard one and then added 5K most frequent English terms,\footnote{\myurl{http://www.wordfrequency.info}} natural disaster names from Wikipedia and a list of popular person names.\footnote{\myurl{https://online.justice.vic.gov.au/bdm/popular-names}}
@@ -180,7 +181,7 @@ This list represents a high quality place names and we separately use them as ga
 \label{sec:mor_feature}
 
 The unique genre in Twitter generates many composite and non-standard location mentions.
-For instance, \myex{chch} represents Christan Church in New Zealand in \myex{Thoughts with everyone in chch \#eqnz - not again!}; 
+For instance, \myex{chch} represents Christchurch in New Zealand in \myex{Thoughts with everyone in chch \#eqnz - not again!}; 
 A standard place name may be concatenated with other tokens, \eg \myex{\#pakistanflood}.
 A naive string match will miss these gazetted terms, therefore, we also match the prefix and suffix of all refined gazetted terms in \secref{sec:gaze_feature} for each token in the tweet.
 The side effect of this approach is it also produces some false positives, \eg \myex{sa} (as South Australia or South Africa) also matches \myex{samsung}.
@@ -193,14 +194,15 @@ Additionally, we also stripped spaces for higher order \ngram for this gazetteer
 
 % description of data and eval metrics, BIO
 The training/dev/test data is offered by ALTA-shared task organisers.
-The collected and filtered tweets in a short period when disastrous events happened.
+The collected and filtered tweets correspond to short time period when several disastrous events happened.
 2K tweets are used to training and 1K tweets are randomly selected for dev and test purpose.
-The dataset, however, is skewed to a number disastrous events such as New Zealand earthquake, Queensland floods.
+The data set, however, is skewed to a number disastrous events such as New Zealand earthquake and Queensland floods.
+
 The evaluation metric is mean-F score which averages the F1 number for each tweet.
 In addition to official evaluation metrics, we also present numbers in a confusion matrix, \ie true positive (TP), false positive (FP), true negative (TN) and false negative (FN).
 
 % model settings: BIO, lowercase, 
-We adopted a state-of-the-art CRF implementation \crfsuite \cite{crfsuite} with default parameters.
+We adopted a state-of-the-art CRF implementation named \crfsuite \cite{crfsuite} with default parameters.
 We used built-in tokenisation and POS tags in \cmu and all our string matching is in lowercase.
 Furthermore, the features are represented in \method{BIO} notation, in which \method{B} and \method{I} represent the beginning and continuity of a location entity, respectively.
 \method{O} denotes non-entity words.
@@ -211,7 +213,7 @@ To correct CRF tagging errors and misses, we further imposed some postporcessing
 Words satisfying the following rules are also added as location mentions:
 (1) A word is in the refined \geoname or a Twitter specific entity is composited by a gazetted term and an English word;
 (2) A word is in a closed set of direction names (\eg \myex{north}, \myex{nth} or \myex{north-east}) or location names (\eg \myex{street}, \myex{st});
-(3) An URL contains an entry in the refined \geoname;
+(3) A URL contains an entry in the refined \geoname;
 (4) If the preceding and previous words of \myex{of} are labelled as locations, then the middle \myex{of} is counted as part of a location mention, \eg \myex{A1058 Coast Rd};
 (5) \myex{CFA} and \myex{CFS} with the following two words are labelled as location mentions, \eg \myex{CFA district 123}.
 
@@ -254,7 +256,7 @@ For instance, \myex{bakery} was not annotated in \myex{Chinatown bakery} but is 
 Some locations such as \myex{Kumbarilla State Forest} or \myex{Shire of Carnar} seem to be false positives as well.
 Possibly the noise in the data set is responsible as well for errors produced by our CRF tagger.
 
-Even with our best efforts to remove location names that would not typically denote a location, there are some GeoNames locations in our dictionary that typically do not denote a location, e.g.~\myex{the end of the world}.
+Even with our best efforts to remove location names that would not typically denote a location, there are some \geoname locations in our dictionary that typically do not denote a location, e.g.~\myex{the end of the world}.
 
 Our system missed some Twitter user names or hashtags with location information (e.g. \myex{@FireRescueNSW}, \myex{@abcsouthqld}, \myex{\#NZquake})
 These locations contain an acronym or abbreviation denoting a location as prefix or suffix of a word that was not in our dictionary.
@@ -279,10 +281,9 @@ We used general English tweets from Twitter Streaming API to obtain the embedded
 Alternatively, this may be due to the high noise/signal ratio, \ie expanding original feature to embedded topics brings more noise than the useful information.
 
 Additionally, we also tried semi-supervised learning by first train a CRF model to annotate locations in a large amount of unseen new tweets, then all locations and tweets are fed into CRF to train a new CRF model for future tagging.
-This approach didn't show improvement either.
-We hypotheses this is due to the same reason that the dataset is skewed to disaster-related location mentions and using more training data from general tweets do not improve the results.
+This approach didn't show any improvement either.
+We hypothesize that this is due to the the data set skewness towards disaster-related location mentions, so adding training data from more general tweets does not improve the results.
 We plan to explore these reasons in the future work.
-
 
 \section{Conclusion and Future Work}
 \label{sec:conclusion}
@@ -292,7 +293,7 @@ Having examined and compared NER feature of existing systems, we proposed our ow
 We further built a CRF-based location mention tagger and analysed the feature contributions.
 Overall, our tagger achieved 0.712 mean-F1 in the shared task.
 Although our extension experiments both show negative results, there is certainly room for further improvements.
-Our discussion and error analysis sheds lights on the future work in this research topic
+Our discussion and error analysis shed light on the future work in this research topic
 
 % include your own bib file like this:
 \bibliographystyle{acl}
