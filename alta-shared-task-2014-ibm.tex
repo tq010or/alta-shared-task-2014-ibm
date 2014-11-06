@@ -95,7 +95,7 @@ For instance, \myex{LOL} is capitalised but it is not a location entity, while \
 Similarly, Twitter specific entities sometimes are sentence constituents, \eg \myex{\#Melbourne} in \myex{\#Melbourne is my fav city.}
 However, they may be a topic tag that does not form part of the syntactic structure of the sentence, such as the hashtags in \myex{I like travel to beautiful places, \#travel \#melbourne}, in which case syntactic features would be less effective.
 
-For this reason, widely-used NER features may need to be re-engineered somewhat for use over social media text.
+For this reason, widely-used NER features may need to be re-engineered for use over social media text.
 
 \section{Feature Engineering}
 \label{sec:feature}
@@ -115,13 +115,13 @@ The word and POS tag features also include the surrounding tokens and tags to ca
 First, a \textit{k}-NN classifier pre-categorises words, and then feeds results to a downstream CRF modeller.
 The features they adopted in \textit{k}-NN are two word text windows including the target word (\ie five words in total).
 The gazetted resources (from Wikipedia) are also utilised and shown to be effective in their experiments.
-As for the features for building the second stage CRF model, they follow \newcite{conll09rati} and made use of tokens, word types (\eg whether the word is alphanumeric or capitalised), word morphological features (\eg suffix and prefix of words), previous tagging labels, word context windows, and conjunction features that combine both tags and word context windows.
+As for the features for building the second stage CRF model, they follow \newcite{conll09rati} and make use of tokens, word types (\eg whether the word is alphanumeric or capitalised), word morphological features (\eg suffix and prefix of words), previous tagging labels, word context windows, and conjunction features that combine both tags and word context windows.
 
 %Among various extensions on their experiments, they also found gazetteers are quite helpful on both social media and existing datasets.
 %Clustering lexical variants seems a complex story, it doesn't show clear improvement on social media dataset (as reported), but bears much improvements on the conventional datasets.
 
 Recently, another \washington NER tool was developed by rebuilding a Twitter-specific NLP pipeline (from tokenisation and POS tagging to chunking and NER).
-They adopted rich information generated in the pipeline, such as POS tags, chunking and predicted capitalisation information, as well as Brown clustering of lexical variants and gazetted features from Freebase.
+They adopted rich information generated in the pipeline, such as POS tags, chunking and predicted capitalisation information, as well as clustering of lexical variants \cite{cl92brow} and gazetted features from Freebase.
 
 % table 
 \begin{table*}[!htbp]
@@ -153,7 +153,7 @@ Based on the previous representative NER work, we considered the following featu
 
 \begin{itemize}
     \item \feature{Word}. Lowercased word types are included as a default feature as suggested by existing systems. Previous and next two words are also included to capture local context information. Larger context window size is not considered as Twitter data is fairly terse and ungrammatical \cite{baldwin2013}, so incorporating long distance context may bring little context information and introduce more noise.
-    \item \feature{POS}. Based on the fact that location named entities are primarily nouns. A reliable POS tagger generates valuable clues for locations. Instead of re-building an NLP pipeline, we adopt an off-the-shelf Twitter POS tagger \cmu that generates coursed-grained POS tags with high accuracy ($\ge$ 90\%) \cite{naacl13owop}. Similar to \feature{word}, the previous and next two \feature{POS} tags are also included. We also consider \feature{POS} bigrams.
+    \item \feature{POS}. Based on the fact that location named entities are primarily nouns. A reliable POS tagger generates valuable clues for locations. Instead of re-building a NLP pipeline, we adopt an off-the-shelf Twitter POS tagger \cmu that generates coursed-grained POS tags with high accuracy ($\ge$ 90\%) \cite{naacl13owop}. Similar to \feature{word}, the previous and next two \feature{POS} tags are also included. We also consider \feature{POS} bigrams.
     \item \feature{Capitalisation}. Instead of predicting token case in Twitter (\eg \cite{emnlp11ritt}), four types of capitalisation information are retrieved based on the original surface form. Namely, they are all character uppercased (AU), all character lowercased (AL), first character uppercased and the rest are lowercased (UL) and mixed capitalisation (MC). We also consider \feature{capitalisation} bigrams.
     \item \feature{Domain}. Twitter specific entities such as user mentions, hashtags and URLs are considered as normal words. This is because many location mentions are embedded in these entities. For instance, \myex{@Iran}, \myex{\#brisbane} and \myurl{http:www.abc.net.au/melbourne/}. Furthermore, we distinguish whether a word is in a stop word or not. Moreover, some location clues such as \myex{street} are also categorised as task-specific features in this feature group.
     \item \feature{Gazetteer}. Literature has shown that external gazetted resources are helpful in identifying named entities. Therefore, we incorporate features based on external place names, \eg whether a current word is in a refined list of locations. Details are in \secref{sec:gaze_feature}.
@@ -164,16 +164,15 @@ Based on the previous representative NER work, we considered the following featu
 \label{sec:gaze_feature}
 
 We adopted \geoname as our primary source of gazetted features.
-%TODO: why filtering generates more entries? before filtering is 8M , after filing is 9.8M? Please double check
-It is a geographical database with information about all countries with over eight million places, such as cities and points of interest.\footnote{\geoname site: \myurl{http://www.geonames.org}} 
+It is a geographical database with information about all countries with over eight million places, such as cities and points of interest.\footnote{\myurl{http://www.geonames.org}} 
 However, as noted by \newcite{acl11liux}, some place names are also commonly used to denote something other than a location.
 Examples of these terms include people's names, natural disasters (\eg \myex{storm}), and names that usually do not denote a location (\eg \myex{Friday} or \myex{Friend}).
 To alleviate the negative impact of these unreliable place names, we collected stopwords starting with a standard one and then added 5K most frequent English terms,\footnote{\myurl{http://www.wordfrequency.info}} natural disaster names from Wikipedia and a list of popular personal names.\footnote{\myurl{https://online.justice.vic.gov.au/bdm/popular-names}}
 
-After extracting and cleaning the terms from \geoname, the list had over 9.8 million terms\footnote{Locations might have more than one name to include variants.}.
+After extracting and cleaning the terms from \geoname, the list had over 9.8 million terms.\footnote{Locations might have more than one name to include variants.}
 The dictionary was used to annotate the tweets using ConceptMapper~\cite{tanenblatt2010conceptmapper} and the \geoname annotation was used as a CRF feature.
 
-On top of refined gazetteers, we also collected country names, state abbreviations, airport IATA codes and place abbreviations (\eg \myex{st} for street) in some English speaking countries from Wikipedia and Google.\footnote{The data is available at \myurl{https://github.com/tq010or/alta-shared-task-2014-ibm}}.
+On top of refined gazetteers, we also collected country names, state abbreviations, airport IATA codes and place abbreviations (\eg \myex{st} for street) in some English speaking countries from Wikipedia and Google.\footnote{The data is available at \myurl{https://github.com/tq010or/alta-shared-task-2014-ibm}}
 The list is also filtered by stopword removal so that it represents a high quality place names and we can separately use them as gazetted features from \geoname.
 
 \subsection{Gazetteer Morphology}
@@ -213,7 +212,7 @@ Words satisfying the following rules are also added as location mentions:
 
 \begin{enumerate}
 \item A word is in the refined \geoname dictionary or a Twitter-specific entity is a gazetted term combined with an English word;
-\item A word is in a closed set of direction names (\eg \myex{north}, \myex{nth} or \myex{north-east}) or location names (\eg \myex{street}, \myex{st});
+\item A word is in a closed set of direction names (\eg \myex{north}, \myex{nth} or \myex{north-east}) or location clues (\eg \myex{street}, \myex{st});
 \item An URL contains an entry in the refined \geoname dictionary;
 \item If the tokens preceding and following \myex{of} are labelled as locations, then the middle \myex{of} is counted as part of a location mention, \eg \myex{north \textbf{of} Brunswick Heads};
 \item \myex{CFA} and \myex{CFS} with the following two words are labelled as location mentions, \eg \myex{CFA district 123}.
@@ -239,7 +238,7 @@ Evaluation metrics                           & mean-F1 & F1    & P     & R      
 \feature{-Capitalisation}                    & 0.748   & 0.761 & 0.769 & 0.752     & 0.723   & 0.753 & 0.769 & 0.737 \\
 \feature{-Domain}                            & 0.758   & 0.772 & 0.781 & 0.763     & 0.715   & 0.749 & 0.768 & 0.732 \\
 \feature{-Gazetteer}                         & 0.751   & 0.770 & 0.776 & 0.763     & 0.725   & 0.749 & 0.758 & 0.741 \\
-\feature{-Gazetteer Morphology}              & 0.754   & 0.772 & 0.780 & 0.763     & 0.727   & 0.756 & 0.770 & 0.742 \\
+\feature{-Gazetteer Morph.}                  & 0.754   & 0.772 & 0.780 & 0.763     & 0.727   & 0.756 & 0.770 & 0.742 \\
 \feature{-Post-processing}                   & 0.714   & 0.743 & 0.814 & 0.684     & 0.700   & 0.736 & 0.814 & 0.672 \\
 \bottomrule
 \end{tabular}
@@ -249,15 +248,17 @@ Evaluation metrics                           & mean-F1 & F1    & P     & R      
 \end{table*}
 
 % overall accuracy and inconsistency of dev/test data
-The evaluation numbers for overall and feature ablations are presented in \tabref{tab:fea_exp}.
-Overall, our best tagger achieved 0.758 and 0.726 mean-F1 on dev and test data, respectively.
-The 3\% inconsistency suggests the evaluation data is either not on randomly partitioned or not \textit{i.i.d.}
+%The evaluation numbers for overall and feature ablations are presented in \tabref{tab:fea_exp}.
+%Overall, our best tagger achieved 0.758 and 0.726 mean-F1 on dev and test data, respectively.
+%The 3\% inconsistency suggests the evaluation data is either not on randomly partitioned or not \textit{i.i.d.}
 
 %TODO: Antonio, could you please add some comparison with other's results here?
 %TODO [Antonio] I added some comments but I find it difficult to comment since we are not aware of others' implementations and I have found some disagreements in their recently published results.
-Kaggle's site shows the results on the test set of our system compared to other systems\footnote{Challenge results on the Dev set: \myurl{https://inclass.kaggle.com/c/alta-2014-challenge/leaderboard}}\footnote{Public and private split of the test set: \myurl{https://inclass.kaggle.com/c/alta-2014-challenge/forums/t/10702/and-the-winner-is/57341#post57341}}.
+The evaluation numbers of our system for overall and feature ablations are presented in \tabref{tab:fea_exp}.
+Kaggle's site shows the results on the test set of our system compared to other systems.\footnote{Challenge results on the dev set: \myurl{https://inclass.kaggle.com/c/alta-2014-challenge/leaderboard}}\footnote{Public and private split of the test set: \myurl{https://inclass.kaggle.com/c/alta-2014-challenge/forums/t/10702/and-the-winner-is/57341#post57341}}
 Compared to results from other participants, our system seems to perform below other participating systems, which is cannot be discussed since we are not aware of the implementation of the other systems.
-In our own results, we find large disagreements between the results on the dev and test data (0.758 vs 0.726), which might indicate that there is a large difference between the sets and that larger training sets are required to avoid overfitting or that additional sets of features might be considered.
+Overall, our best tagger achieved 0.758 and 0.726 mean-F1 on dev and test data, respectively.
+The noticeable disagreements between the results on the dev and test data indicates that there is a large difference between the sets and that larger training sets are required to avoid overfitting or that additional sets of features might be considered.
 
 % useful features and abnormal features
 Among all features, we saw that \feature{word} and \feature{post-processing} are the most important features to NER.
@@ -317,13 +318,13 @@ We hypothesise that this is due to the data set being skewed towards disaster-re
 
 \section{Conclusion and Future Work}
 \label{sec:conclusion}
-In this paper, we described our system in participating ALTA-shared 2014 task --- identifying location mentions in Twitter.
+In this paper, we described our system in participating ALTA-shared task --- identifying location mentions in Twitter.
 We formulated the problem as a location entity recognition task to scope our efforts in NER literature.
 Having examined and compared NER feature of existing systems, we proposed our own feature set with justifications.
 We further built a CRF-based location mention tagger and analysed the feature contributions.
 Overall, our tagger achieved 0.726 mean-F1 in the shared task.
 Although our extension experiments both show negative results, there is certainly room for further improvements.
-Our discussion and error analysis shed light on the future work in this research topic
+Our discussion and error analysis shed light on the future work in this research topic.
 
 % include your own bib file like this:
 \bibliographystyle{acl}
