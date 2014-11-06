@@ -53,23 +53,6 @@
   {\tt admackin@au1.ibm.com}, {\tt qiangchen@au1.ibm.com} 
   \\}
 
-%\author{Bo Han \\
-%  IBM Research \\
-%  Melbourne, VIC, Australia \\
-%  {\tt bohan.ibm@au1.ibm.com} \\ \And
-%  Antonio Jimeno Yepes \\
-%  IBM Research \\
-%  Melbourne, VIC, Australia \\
-%  {\tt antonio.jimeno@au1.ibm.com} \\ \And
-%  Andrew MacKinlay \\
-%  IBM Research \\
-%  Melbourne, VIC, Australia \\
-%  {\tt admackin@au1.ibm.com}\\ \And
-%  Qiang Chen \\
-%  IBM Research \\
-%  Melbourne, VIC, Australia \\
-%  {\tt qiangchen@au1.ibm.com}\\}
-
 \date{}
 
 \begin{document}
@@ -239,6 +222,7 @@ Words satisfying the following rules are also added as location mentions:
 
 %TODO: do we want to highlight the numbers?
 %TODO [Antonio] Yes, what is the configuration used for our ALTA submission?
+%TODO: [Bo] the configuration is based on the feature section. We incorporate all features and then examine the impact of feature abalations
 \begin{table*}[!htbp]
 \begin{center}
 \begin{tabular}{lcccccccc}
@@ -291,7 +275,6 @@ This suggests developing reliable capitalisation restoration and NLP pipeline wi
 \label{sec:error_analysis}
 %% We could talk about the issues with our approach
 
-%TODO: I think I can offer you our best run results and you may double check whether the examples are still correct. Current discussion is based on our last submission (second to the best).
 Our system incorrectly identified some tokens as locations.
 Most of the false positives were due to CRF mistakes.
 Examples of these mistakes are annotation of tokens like \myex{bushfires}, 
